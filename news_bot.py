@@ -1,46 +1,32 @@
 from telegram import Bot
 import time
-import imghdr
-import os
 
+# Your Bot Token
 BOT_TOKEN = "8200878464:AAE6H-bM6uhNGE5TndW_xPVIHabcthPJAHQ"
+
+# Create the bot
 bot = Bot(token=BOT_TOKEN)
 
-print("Waiting for message...")
+print("Bot is running...")
 
+# Keep track of last message
 last_update_id = None
 
 while True:
+    # Get new updates
     updates = bot.get_updates(offset=last_update_id, timeout=10)
+
     for update in updates:
-        if update.message:
-            chat_id = update.message.chat.id
+        message = update.message
+        if message:
+            chat_id = message.chat.id
+            text = message.text
 
-            # Handle text messages
-            if update.message.text:
-                text = update.message.text
-                bot.send_message(chat_id=chat_id, text=f"You said: {text}")
-                print(f"Responded to text from chat ID {chat_id}")
+            # Reply with the same message
+            bot.send_message(chat_id=chat_id, text=f"You said: {text}")
+            print(f"Replied to: {text}")
 
-            # Handle image messages
-            if update.message.photo:
-                photo = update.message.photo[-1]  # Get highest resolution photo
-                file = bot.get_file(photo.file_id)
-
-                # Download image
-                file_path = f"temp_{photo.file_id}.jpg"
-                file.download(file_path)
-
-                # Detect image type
-                img_type = imghdr.what(file_path)
-                bot.send_message(chat_id=chat_id, text=f"Received an image. Type: {img_type}")
-
-                print(f"Received image of type: {img_type} from chat ID {chat_id}")
-
-                # Clean up
-                os.remove(file_path)
-
-            # Update offset to avoid processing same message
+            # Update offset
             last_update_id = update.update_id + 1
 
-    time.sleep(2)
+    time.sleep(1)

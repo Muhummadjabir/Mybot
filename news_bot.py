@@ -1,25 +1,25 @@
-import requests
-import schedule
-import time
 from telegram import Bot
+import time
 
-# Your test bot token and chat ID
 BOT_TOKEN = "8200878464:AAE6H-bM6uhNGE5TndW_xPVIHabcthPJAHQ"
-CHAT_ID = "YOUR_CHAT_ID_HERE"  # Replace this with your actual chat ID
-
 bot = Bot(token=BOT_TOKEN)
 
-def get_news():
-    return "📰 Daily Update: The world is still spinning."
+print("Waiting for message...")
 
-def send_news():
-    news = get_news()
-    bot.send_message(chat_id=CHAT_ID, text=news)
+last_update_id = None
 
-# Schedule to run every day at 8 AM
-schedule.every().day.at("08:00").do(send_news)
-
-print("Bot is running...")
 while True:
-    schedule.run_pending()
-    time.sleep(1)
+    updates = bot.get_updates(offset=last_update_id, timeout=10)
+    for update in updates:
+        if update.message:
+            chat_id = update.message.chat.id
+            text = update.message.text
+
+            # Send response back to the user
+            bot.send_message(chat_id=chat_id, text=f"You said: {text}")
+            print(f"Responded to chat ID {chat_id}")
+
+            # Move to next update
+            last_update_id = update.update_id + 1
+
+    time.sleep(2)
